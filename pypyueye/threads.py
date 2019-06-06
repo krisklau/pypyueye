@@ -143,7 +143,7 @@ class RecordThread(GatherThread):
             self.vw.write(imdata.as_1d_image())
         self.ind_frame += 1
         if self.verbose:
-            print(f"\r{self.ind_frame}/{self.nmb_frame} frames taken", end="")
+            pass#print(f"\r{self.ind_frame}/{self.nmb_frame} frames taken", end="")
         # stop
         if self.ind_frame >= self.nmb_frame:
             print('\n')
@@ -154,7 +154,7 @@ class RecordThread(GatherThread):
             print("Saving images to drive...")
             self.vw = self.open_video_writer()
             for i, im in enumerate(self.in_memory_images):
-                print(f"\r{i}/{self.nmb_frame} frames saved", end="")
+                pass#print(f"\r{i}/{self.nmb_frame} frames saved", end="")
                 self.vw.write(im)
             print("\nDone")
         self.vw.release()
