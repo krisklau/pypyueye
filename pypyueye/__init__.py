@@ -23,7 +23,7 @@
 """  """
 
 from .camera import Camera
-from .gui import PyuEyeQtApp, PyuEyeQtView
+
 from .threads import GatherThread, SaveThread, RecordThread, FrameThread, \
     UselessThread
-from .detectors import CircleDetector
+
