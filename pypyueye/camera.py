@@ -209,12 +209,10 @@ class Camera(object):
         pcmin, pcmax, pcincr = pcrange
         if pixelclock < pcmin:
             pixelclock = pcmin
-            print(f"Pixelclock out of range [{pcmin}, {pcmax}] and set "
-                  f"to {pcmin}")
+            print("Pixelclock out of range relative to min")
         elif pixelclock > pcmax:
             pixelclock = pcmax
-            print(f"Pixelclock out of range [{pcmin}, {pcmax}] and set "
-                  f"to {pcmax}")
+            print("Pixelclock out of range relative to max")
         # Set pixelclock
         pixelclock = ueye.c_uint(pixelclock)
         check(ueye.is_PixelClock(self.h_cam, ueye.IS_PIXELCLOCK_CMD_SET,
