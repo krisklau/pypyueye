@@ -78,7 +78,7 @@ def get_bits_per_pixel(color_mode):
     Returns the number of bits per pixel for the given color mode.
     """
     if color_mode not in bits_per_pixel.keys():
-        raise uEyeException(f'Unknown color mode: {color_mode}')
+        raise uEyeException('Unknown color mode: %d' % color_mode)
     return bits_per_pixel[color_mode]
 
 
