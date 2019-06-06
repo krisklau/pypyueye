@@ -116,12 +116,10 @@ class Camera(object):
                     rect_aoi.s32Width.value,
                     rect_aoi.s32Height.value)
 
-      
-    def get_gain(self):
-        pass
 
     def set_gain(self, master, r, g, b):
-        pass
+        ueye.is_SetHardwareGain(self.h_cam, master, r,g,b)
+        
     def set_aoi(self, x, y, width, height):
         """
         Set the area of interest.
