@@ -352,7 +352,7 @@ class Camera(object):
                 ims.append(imdata.as_1d_image())
                 imdata.unlock()
             else:
-                print(f"Warning: Missed {i}th frame !")
+                print("Warning: Missed %dth frame !"% d)
                 ims.append(None)
         self.stop_video()
         return ims
