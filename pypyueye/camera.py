@@ -149,14 +149,8 @@ class Camera(object):
         # checking available fps
         mini, maxi = self.get_fps_range()
         if fps < mini:
-            print(f'Warning: Specified fps ({fps:.2f}) not in possible range:'
-                  f' [{mini:.2f}, {maxi:.2f}].'
-                  f' fps has been set to {mini:.2f}.')
             fps = mini
         if fps > maxi:
-            print(f'Warning: Specified fps ({fps:.2f}) not in possible range:'
-                  f' [{mini:.2f}, {maxi:.2f}].'
-                  f' fps has been set to {maxi:.2f}.')
             fps = maxi
         fps = ueye.c_double(fps)
         new_fps = ueye.c_double()
