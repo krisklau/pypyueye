@@ -3,7 +3,8 @@
 Convenience wrapper around [pyueye](https://pypi.python.org/pypi/pyueye) API for IDS cameras.
 
 Pypyueye allows to easily display live videos, save images or record videos usin IDS cameras.
-It is also easy to plug the live video through [opencv](https://opencv.org/) for live image analysis.
+
+Relative to the original pypyueye, this fork replaces opencv with imageio, for fewer incompatibilities with embedded systems. 
 
 ## Installation
 
