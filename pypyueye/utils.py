@@ -29,7 +29,6 @@ __status__ = "Development"
 
 from pyueye import ueye
 from threading import Thread
-import cv2
 
 
 error_codes = {ueye.IS_INVALID_EXPOSURE_TIME: "Invalid exposure time",

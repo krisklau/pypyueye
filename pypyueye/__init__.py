@@ -24,6 +24,6 @@
 
 from .camera import Camera
 
-from .threads import GatherThread, SaveThread, RecordThread, FrameThread, \
-    UselessThread
+#from .threads import GatherThread, SaveThread, RecordThread, FrameThread, \
+#    UselessThread
 

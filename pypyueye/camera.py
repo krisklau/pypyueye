@@ -54,7 +54,7 @@ class Camera(object):
 
     def alloc(self):
         """
-        Allocate memory for futur images.
+        Allocate memory for future images.
         """
         # Get camera settings
         rect = self.get_aoi()
