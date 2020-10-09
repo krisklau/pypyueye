@@ -136,6 +136,29 @@ class Camera(object):
         rect_aoi.s32Height = ueye.int(height)
         return ueye.is_AOI(self.h_cam, ueye.IS_AOI_IMAGE_SET_AOI, rect_aoi,
                            ueye.sizeof(rect_aoi))
+                           
+    def set_subsampling(self, factor, direction):
+        """
+        Set the area of interest.
+
+        Parameters
+        ==========
+        factor: int or str (1-4)
+        direction: 'v' or 'h'
+            set subsampling factor and direction 
+        """
+        sub_opts = {
+                       '1': {'v': ueye.IS_SUBSAMPLING_DISABLE, 
+                             'h': ueye.IS_SUBSAMPLING_DISABLE},
+                       '2': {'v': ueye.IS_SUBSAMPLING_2X_VERTICAL,
+                             'h': ueye.IS_SUBSAMPLING_2X_HORIZONTAL},
+                       '3': {'v': ueye.IS_SUBSAMPLING_3X_VERTICAL,
+                             'h': ueye.IS_SUBSAMPLING_3X_HORIZONTAL},
+                       '4': {'v': ueye.IS_SUBSAMPLING_4X_VERTICAL,
+                             'h': ueye.IS_SUBSAMPLING_4X_HORIZONTAL}
+                   }
+            
+        return ueye.is_SetSubSampling(self.h_cam, sub_opts[str(factor)][direction])
 
     def set_fps(self, fps):
         """
@@ -143,7 +166,7 @@ class Camera(object):
 
         Returns
         =======
-        fps: number
+        fps: number⎄
             Real fps, can be slightly different than the asked one.
         """
         # checking available fps
