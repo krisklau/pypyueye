@@ -28,9 +28,7 @@ __status__ = "Development"
 
 
 from camera import Camera
-from utils import FrameThread, SaveThread, RecordThread
 from pyueye import ueye
-import cv2
 import numpy as np
 
 

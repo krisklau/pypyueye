@@ -30,7 +30,7 @@ __status__ = "Development"
 from pyueye import ueye
 from threading import Thread
 from .utils import ImageData, ImageBuffer
-import cv2
+import imageio as iio
 
 
 class GatherThread(Thread):
@@ -44,6 +44,7 @@ class GatherThread(Thread):
         self.cam.capture_video()
         self.running = True
         self.copy = copy
+        self.d = 0
 
     def run(self):
         while self.running:
@@ -55,13 +56,17 @@ class GatherThread(Thread):
             if ret == ueye.IS_SUCCESS:
                 imdata = ImageData(self.cam.handle(), img_buffer)
                 self._process(imdata)
+            else:
+                print("Warning: Missed %dth frame !"% self.d)
+                self.d += 1 
 
     def process(self, image_data):
         pass
 
     def _process(self, image_data):
         self.process(image_data)
-        #image_data.unlock()
+        self.d += 1
+        image_data.unlock()
 
     def stop(self):
         self.cam.stop_video()
@@ -101,61 +106,40 @@ class UselessThread(GatherThread):
 class SaveThread(GatherThread):
     def __init__(self, cam, path, copy=True):
         """
-        Thread used for saving images.
+        Thread used for saving one image.
         """
         super().__init__(cam=cam, copy=copy)
         self.path = path
 
     def process(self, image_data):
-        cv2.imwrite(self.path, image_data.as_1d_image())
+        iio.imwrite(self.path, image_data.as_1d_image())
         self.stop()
-
-
-class RecordThread(GatherThread):
-    def __init__(self, cam, path, use_memory=False, nmb_frame=10, copy=True,
-                 verbose=False):
+        
+class MultiFrameThread(GatherThread):
+    def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True):
         """
-        Thread used to record videos.
+        Thread used for saving multiple images.
         """
         super().__init__(cam=cam, copy=copy)
-        self.nmb_frame = nmb_frame
-        self.use_memory = use_memory
-        self.verbose = verbose
-        self.ind_frame = 0
-        self.path = path
-        # Create videowriter instance if needed
-        if not self.use_memory:
-            self.vw = self.open_video_writer()
-        self.in_memory_images = []
+        
+        self.base_name = base_name
+        if folder[-1] != '/':
+            folder += '/'
+        self.folder = folder
+        self.file_type = file_type
+        
+        self.max_frames = max_frames
 
-    def open_video_writer(self):
-        aoi = self.cam.get_aoi()
-        fourcc = cv2.VideoWriter_fourcc("M", "P", "E", "G")
-        return cv2.VideoWriter(self.path,
-                               fourcc=fourcc,
-                               fps=24,
-                               frameSize=(aoi.width, aoi.height),
-                               isColor=0)
-    def process(self, imdata):
-        if self.use_memory:
-            self.in_memory_images.append(imdata.as_1d_image())
-        else:
-            self.vw.write(imdata.as_1d_image())
-        self.ind_frame += 1
-        if self.verbose:
-            pass#print(f"\r{self.ind_frame}/{self.nmb_frame} frames taken", end="")
-        # stop
-        if self.ind_frame >= self.nmb_frame:
-            print('\n')
-            self.stop()
+    def path(self):
+        return self.folder + self.base_name + str(self.d) + self.file_type
 
-    def stop(self):
-        if self.use_memory:
-            print("Saving images to drive...")
-            self.vw = self.open_video_writer()
-            for i, im in enumerate(self.in_memory_images):
-                pass#print(f"\r{i}/{self.nmb_frame} frames saved", end="")
-                self.vw.write(im)
-            print("\nDone")
-        self.vw.release()
-        super().stop()
+    def process(self, image_data):
+        iio.imwrite(self.path(), image_data.as_1d_image())
+        
+        if self.max_frames > 0:
+            if self.d + 2 > self.max_frames:
+                self.stop()
+                    
+
+
+
