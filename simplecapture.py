@@ -3,12 +3,12 @@ from pyueye import ueye
 from pypyueye import Camera as Cam
 from pypyueye.threads import MultiFrameThread
 
-FPS = 5
+FPS = 20
 AOI = (0,0,1088,2048)
-PIXEL_CLOCK = 100
+PIXEL_CLOCK = 160
 FOLDER = "~/tmp"
 BASE_NAME = "test"
-MAX_FRAMES = 10
+MAX_FRAMES = 1000
 
 with Cam() as c:
     c.set_colormode(ueye.IS_CM_MONO8)
@@ -31,6 +31,6 @@ with Cam() as c:
     
     print(f'handle: {c.handle()}')
         
-    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME, max_frames=MAX_FRAMES)
+    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME, max_frames=MAX_FRAMES, file_type='.jpg')
     thread.start()
     thread.join()
