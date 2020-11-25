@@ -31,6 +31,7 @@ from pyueye import ueye
 from threading import Thread
 from .utils import ImageData, ImageBuffer
 import imageio as iio
+import time
 
 
 class GatherThread(Thread):
@@ -45,6 +46,7 @@ class GatherThread(Thread):
         self.running = True
         self.copy = copy
         self.d = 0
+        self.capt_time = -1
 
     def run(self):
         while self.running:
@@ -54,6 +56,7 @@ class GatherThread(Thread):
                                            img_buffer.mem_ptr,
                                            img_buffer.mem_id)
             if ret == ueye.IS_SUCCESS:
+                self.capt_time = time.time()
                 imdata = ImageData(self.cam.handle(), img_buffer)
                 self._process(imdata)
             else:
@@ -131,7 +134,8 @@ class MultiFrameThread(GatherThread):
         self.max_frames = max_frames
 
     def path(self):
-        return self.folder + self.base_name + str(self.d) + self.file_type
+        time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
+        return self.folder + self.base_name + capt_time + self.file_type
 
     def process(self, image_data):
         iio.imwrite(self.path(), image_data.as_1d_image())
