@@ -20,16 +20,19 @@ parser.add_argument('-n', '--number_of_frames',
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
 
+args = parser.parse_args()
 
+# assigning the arguments to variables for simple backwards compatibility
+FPS = args.fps
+FOLDER = args.captured_images_path
+BASE_NAME = args.base_name
+MAX_FRAMES = args.number_of_frames
+FILE_TYPE = '.' + args.file_type
 
 
 # DEFAULTS
-FPS = 20
 AOI = (0,0,1088,2048)
 PIXEL_CLOCK = 160
-FOLDER = "~/tmp"
-BASE_NAME = "test"
-MAX_FRAMES = 1000
 
 with Cam() as c:
     c.set_colormode(ueye.IS_CM_MONO8)
@@ -52,6 +55,6 @@ with Cam() as c:
 
     print(f'handle: {c.handle()}')
 
-    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME, max_frames=MAX_FRAMES, file_type='.jpg')
+    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME, max_frames=MAX_FRAMES, file_type=FILE_TYPE)
     thread.start()
     thread.join()
