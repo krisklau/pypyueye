@@ -34,6 +34,10 @@ import imageio as iio
 import time
 import spectral.io.envi as envi
 
+#Globals
+#how often to flush the data stored in the envi file format to disk
+ENVI_FLUSHING_N = 100
+
 
 class GatherThread(Thread):
     def __init__(self, cam, copy=True):
@@ -134,38 +138,53 @@ class MultiFrameThread(GatherThread):
             folder += '/'
         self.folder = folder
         self.file_type = file_type
-        if self.file_type = '.envi':
-            def process(self, image_data):
-
+        self.set_process()
 
         self.max_frames = max_frames
         if aoi:
             self.aoi = aoi
 
+
+    def time_str(self):
+        return '{:.0f}'.format(self.capt_time*1000) # in ms
+
+
     def set_path(self):
-        time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
-        self.path = self.folder + self.base_name + time_str + self.file_type
+        self.path = self.folder + self.base_name + self.time_str() + self.file_type
         return self.path
+
+
+    def stop_check(self):
+        if self.max_frames > 0:
+            if self.d + 2 > self.max_frames:
+                self.stop()
+                return True
+            else:
+                return False
+
 
     def set_process(self):
         if self.file_type = '.envi':
+            # envi cannot rely on the iio lib
+            self.prep_envi_capture()
+
             def process(self, image_data):
-            #save data
-            #save timing
+                #save data
+                self.map[:, self.d, :] = image_data.as_1d_image()[:, :]
+                if self.d % ENVI_FLUSHING_N == 0:
+                    self.map.flush()
+                #save timing
+                with open(self.timings, 'a+') as ftimings:
+                    ftimings.write(self.time_str() + ",")
+
+                #end if max frames
+                if self.stop_check():
+                    self.map.flush()
         else:
             def process(self, image_data):
                 iio.imwrite(self.path(), image_data.as_1d_image())
+                self.stop_check()
 
-                if self.max_frames > 0:
-                    if self.d + 2 > self.max_frames:
-                        self.stop()
-
-    #def process(self, image_data):
-    #    iio.imwrite(self.set_path(), image_data.as_1d_image())
-   #
-    #    if self.max_frames > 0:
-    #        if self.d + 2 > self.max_frames:
-    #            self.stop()
 
     def prep_envi_capture(self):
         # define the metadata
@@ -178,9 +197,12 @@ class MultiFrameThread(GatherThread):
              }
         # determine saving location
         self.loc = self.folder + self.base_name + ".hdr"
-        self.timings_name = self.folder + self.base_name + "_timings.txt"
-        self.envi = envi.creat_image(self.loc, md)
-        self.timings = open(self.timings_name, "w+")
-        return envi.creat_image(self.loc, md), self.timings
+        self.timings = self.folder + self.base_name + "_timings.csv"
+
+        #initialize datacube and timings
+        self.envi = envi.create_image(self.loc, md)
+        self.map = self.envi.open_memmap(writable=True)
+
+        return self.map, self.timings
 
 
