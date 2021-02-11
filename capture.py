@@ -18,6 +18,8 @@ parser.add_argument('-n', '--number_of_frames',
                     default=100, help='total number of frames to capture' )
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
+parser.add_argument('-b', '--binning', default="1",
+                    help='number of raw pixels per saved pixel')
 
 args = parser.parse_args()
 
@@ -27,6 +29,7 @@ FOLDER = args.captured_images_path
 BASE_NAME = args.base_name
 MAX_FRAMES = args.number_of_frames
 FILE_TYPE = '.' + args.file_type
+#should add binning support with "numpy.add.reduceat"
 
 
 # DEFAULTS
