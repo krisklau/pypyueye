@@ -6,7 +6,6 @@ from pypyueye import Camera as Cam
 from pypyueye.threads import MultiFrameThread
 
 # Setting up argparse
-
 parser = argparse.ArgumentParser('capture images')
 parser.add_argument('captured_images_path', metavar='path',
                     type=str, help='folder where data will be stored',
@@ -55,6 +54,8 @@ with Cam() as c:
 
     print(f'handle: {c.handle()}')
 
-    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME, max_frames=MAX_FRAMES, file_type=FILE_TYPE)
+    thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME,
+                              max_frames=MAX_FRAMES, file_type=FILE_TYPE,
+                              aoi=AOI)
     thread.start()
     thread.join()

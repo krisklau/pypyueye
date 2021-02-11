@@ -26,12 +26,13 @@ __version__ = ""
 __email__ = "gaby.launay@tutanota.com"
 __status__ = "Development"
 
-
+import numpy as np
 from pyueye import ueye
 from threading import Thread
 from .utils import ImageData, ImageBuffer
 import imageio as iio
 import time
+import spectral.io.envi as envi
 
 
 class GatherThread(Thread):
@@ -61,7 +62,7 @@ class GatherThread(Thread):
                 self._process(imdata)
             else:
                 print("Warning: Missed %dth frame !"% self.d)
-                self.d += 1 
+                self.d += 1
 
     def process(self, image_data):
         pass
@@ -117,33 +118,69 @@ class SaveThread(GatherThread):
     def process(self, image_data):
         iio.imwrite(self.path, image_data.as_1d_image())
         self.stop()
-        
+
 class MultiFrameThread(GatherThread):
-    def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True):
+    def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True,
+                 aoi=(), ):
         """
         Thread used for saving multiple images.
+
+        aoi is only needed for envi saving
         """
         super().__init__(cam=cam, copy=copy)
-        
+
         self.base_name = base_name
         if folder[-1] != '/':
             folder += '/'
         self.folder = folder
         self.file_type = file_type
-        
+        if self.file_type = '.envi':
+            def process(self, image_data):
+
+
         self.max_frames = max_frames
+        if aoi:
+            self.aoi = aoi
 
-    def path(self):
+    def set_path(self):
         time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
-        return self.folder + self.base_name + capt_time + self.file_type
+        self.path = self.folder + self.base_name + time_str + self.file_type
+        return self.path
 
-    def process(self, image_data):
-        iio.imwrite(self.path(), image_data.as_1d_image())
-        
-        if self.max_frames > 0:
-            if self.d + 2 > self.max_frames:
-                self.stop()
-                    
+    def set_process(self):
+        if self.file_type = '.envi':
+            def process(self, image_data):
+            #save data
+            #save timing
+        else:
+            def process(self, image_data):
+                iio.imwrite(self.path(), image_data.as_1d_image())
 
+                if self.max_frames > 0:
+                    if self.d + 2 > self.max_frames:
+                        self.stop()
+
+    #def process(self, image_data):
+    #    iio.imwrite(self.set_path(), image_data.as_1d_image())
+   #
+    #    if self.max_frames > 0:
+    #        if self.d + 2 > self.max_frames:
+    #            self.stop()
+
+    def prep_envi_capture(self):
+        # define the metadata
+        md = {
+                 "bands": self.aoi[3],
+                 "lines": self.aoi[2],
+                 "samples": self.max_frames,
+                 "data type": np.uint16,
+                 "interleave": 'bip'
+             }
+        # determine saving location
+        self.loc = self.folder + self.base_name + ".hdr"
+        self.timings_name = self.folder + self.base_name + "_timings.txt"
+        self.envi = envi.creat_image(self.loc, md)
+        self.timings = open(self.timings_name, "w+")
+        return envi.creat_image(self.loc, md), self.timings
 
 
