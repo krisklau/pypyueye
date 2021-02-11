@@ -24,10 +24,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='Pypyueye',
-    version='1.0',
+    version='1.0a',
     description='Convenience wrapper around pyueye.',
-    author='Gaby Launay',
-    author_email='gaby.launay@tutanota.com',
+    author='Gaby Launay (original), Joe Garrett (simplification)',
+    author_email='gaby.launay@tutanota.com, joseph.garrett@ntnu.no',
     license='GPLv3',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -41,7 +41,10 @@ setup(
     keywords='ueye camera',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'samples']),
     # TODO: Add PyQt4 as requirement
-    install_requires=['pyueye'],
+    install_requires=['pyueye',
+                      'imageio',
+                      'numpy',
+                      'spectral'],
     extras_require={},
     # setup_requires=['pytest-runner'],
     # tests_require=['pytest'],
