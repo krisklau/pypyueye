@@ -29,7 +29,7 @@ __status__ = "Development"
 import numpy as np
 from pyueye import ueye
 from threading import Thread
-from .utils import ImageData, ImageBuffer
+from .utils import ImageData, ImageBuffer, do_bin
 import imageio as iio
 import time
 import spectral.io.envi as envi
@@ -125,7 +125,7 @@ class SaveThread(GatherThread):
 
 class MultiFrameThread(GatherThread):
     def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True,
-                 aoi=(), ):
+                 aoi=(), binning=()):
         """
         Thread used for saving multiple images.
 
@@ -143,6 +143,9 @@ class MultiFrameThread(GatherThread):
         self.max_frames = max_frames
         if aoi:
             self.aoi = aoi
+
+        if binning:
+            self.binning = binning
 
 
     def time_str(self):
@@ -162,6 +165,20 @@ class MultiFrameThread(GatherThread):
             else:
                 return False
 
+    def set_data(self):
+        if binning:
+            def data(self, image_data):
+
+                a = do_bin(image_data.as_1d_image(),
+                           factor=self.binning[0],
+                           axis=0)
+                b = do_bin(a,
+                           factor=self.binning[1],
+                           axis=1)
+                return b
+        else:
+            def data(self, image_data):
+                return image_data.as_1d_image()
 
     def set_process(self):
         if self.file_type = '.envi':

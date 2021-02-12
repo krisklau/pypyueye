@@ -29,6 +29,7 @@ __status__ = "Development"
 
 from pyueye import ueye
 from threading import Thread
+import numpy as np
 
 
 error_codes = {ueye.IS_INVALID_EXPOSURE_TIME: "Invalid exposure time",
@@ -171,3 +172,16 @@ class Rect:
         self.y = y
         self.width = width
         self.height = height
+
+def do_bin(arr, factor, axis):
+    '''
+    Bin by factor along a particular axis
+    all bins have same counts, except the last
+    '''
+    L = arr.shape[axis]
+    bins = int(np.ceil(L / factor))
+    slices = [factor*i for i in range(bins)]
+    slices.append(L)
+
+    binned = np.add.reduceat(arr, slices[:-1], axis=axis)
+    return binned
