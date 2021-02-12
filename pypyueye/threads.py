@@ -168,10 +168,11 @@ class MultiFrameThread(GatherThread):
     def set_data(self):
         if binning:
             def data(self, image_data):
-
+                # bin along axis 0
                 a = do_bin(image_data.as_1d_image(),
                            factor=self.binning[0],
                            axis=0)
+                # bin along axis 1
                 b = do_bin(a,
                            factor=self.binning[1],
                            axis=1)

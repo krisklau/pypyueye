@@ -18,7 +18,7 @@ parser.add_argument('-n', '--number_of_frames',
                     default=100, help='total number of frames to capture' )
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
-parser.add_argument('-b', '--binning', default="1",
+parser.add_argument('-b', '--binning', default=[1,1], nargs=2
                     help='number of raw pixels per saved pixel')
 
 args = parser.parse_args()
@@ -29,6 +29,7 @@ FOLDER = args.captured_images_path
 BASE_NAME = args.base_name
 MAX_FRAMES = args.number_of_frames
 FILE_TYPE = '.' + args.file_type
+BINNING = tuple(args.binnig)
 #should add binning support with "numpy.add.reduceat"
 
 
@@ -59,6 +60,6 @@ with Cam() as c:
 
     thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME,
                               max_frames=MAX_FRAMES, file_type=FILE_TYPE,
-                              aoi=AOI)
+                              aoi=AOI, binning=BINNING)
     thread.start()
     thread.join()
