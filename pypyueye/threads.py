@@ -131,21 +131,27 @@ class MultiFrameThread(GatherThread):
 
         aoi is only needed for envi saving
         """
-        super().__init__(cam=cam, copy=copy)
 
+        print("starting")
         self.base_name = base_name
         if folder[-1] != '/':
             folder += '/'
         self.folder = folder
         self.file_type = file_type
-        self.set_process()
 
-        self.max_frames = max_frames
         if aoi:
             self.aoi = aoi
 
+        self.max_frames = max_frames
         if binning:
             self.binning = binning
+
+        self.set_process()
+        print("process set")
+
+
+
+        super().__init__(cam=cam, copy=copy)
 
 
     def time_str(self):
@@ -153,7 +159,7 @@ class MultiFrameThread(GatherThread):
 
 
     def set_path(self):
-        self.path = self.folder + self.base_name + self.time_str() + self.file_type
+        self.path = self.folder + self.base_name + self.time_str() + '.' + self.file_type
         return self.path
 
 
@@ -181,8 +187,12 @@ class MultiFrameThread(GatherThread):
             def data(self, image_data):
                 return image_data.as_1d_image()
 
+    def path(self):
+        time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
+        return self.folder + self.base_name + str(int(self.capt_time)) + self.file_type
+
     def set_process(self):
-        if self.file_type = '.envi':
+        if self.file_type=='envi':
             # envi cannot rely on the iio lib
             self.prep_envi_capture()
 
@@ -203,6 +213,8 @@ class MultiFrameThread(GatherThread):
                 iio.imwrite(self.path(), image_data.as_1d_image())
                 self.stop_check()
 
+        self.process = lambda image_data: process(self, image_data)
+
 
     def prep_envi_capture(self):
         # define the metadata
@@ -210,11 +222,12 @@ class MultiFrameThread(GatherThread):
                  "bands": self.aoi[3],
                  "lines": self.aoi[2],
                  "samples": self.max_frames,
-                 "data type": np.uint16,
+                 "data type": 12,
                  "interleave": 'bip'
              }
         # determine saving location
         self.loc = self.folder + self.base_name + ".hdr"
+        print(self.loc)
         self.timings = self.folder + self.base_name + "_timings.csv"
 
         #initialize datacube and timings
@@ -223,4 +236,29 @@ class MultiFrameThread(GatherThread):
 
         return self.map, self.timings
 
+class old_MultiFrameThread(GatherThread):
+    def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True):
+        """
+        Thread used for saving multiple images.
+        """
+        super().__init__(cam=cam, copy=copy)
+
+        self.base_name = base_name
+        if folder[-1] != '/':
+            folder += '/'
+        self.folder = folder
+        self.file_type = file_type
+
+        self.max_frames = max_frames
+
+    def path(self):
+        time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
+        return self.folder + self.base_name + str(int(self.capt_time)) + self.file_type
+
+    def process(self, image_data):
+        iio.imwrite(self.path(), image_data.as_1d_image())
+
+        if self.max_frames > 0:
+            if self.d + 2 > self.max_frames:
+                self.stop()
 
