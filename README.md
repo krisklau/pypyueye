@@ -50,5 +50,15 @@ See [example.py](https://github.com/galaunay/pypyueye/blob/master/example.py) fo
 
 ## Documentation
 
+The script simple_capture runs the camera without any metaparameters, 
+while capture typically requires command added inline. 
+The different options can be seen by running "python3 capture.py".
+
+Note that all the file formats except envi use imageio for saving, but
+envi uses spectral python. Thus, to save as envi requires specifying the 
+absolute file path, whereas the other file types can be stored with relative
+file paths. 
+
+
 Pypyueye is documented inline.
 The documentation of the [Camera](https://github.com/galaunay/pypyueye/blob/master/pypyueye/camera.py#L35) class is a good start.
