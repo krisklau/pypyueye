@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import signal, os
 
 from pyueye import ueye
 from pypyueye import Camera as Cam
@@ -72,5 +73,18 @@ with Cam() as c:
     thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME,
                               max_frames=MAX_FRAMES, file_type=FILE_TYPE,
                               aoi=AOI, binning=BINNING, do_print=DO_PRINT)
+
+    def handler(signum, frame):
+        print('Signal handler called with signal \n', signum)
+        if signum == signal.SIGINT:
+            print("Stopping capture \n")
+            thread.stop()
+
+    # Register handler
+    print('Setting up signal handler. \n')
+    signal.signal(signal.SIGINT, handler)
+
     thread.start()
     thread.join()
+
+    print("Done capturing. ")
