@@ -212,6 +212,7 @@ class MultiFrameThread(GatherThread):
                 if self.stop_check():
                     self.map.flush()
         elif self.file_type=='.bip':
+            self.envi_metadata()
             def process(self, image_data):
                 image_data.as_1d_image().astype(np.int16).tofile(self.path())
                 print(self.path())
@@ -231,6 +232,22 @@ class MultiFrameThread(GatherThread):
             image_data.unlock()
         self._process = lambda image_data: _process(self, image_data)
 
+
+    def envi_metadata(self):
+        md = {
+                 "bands": self.aoi[3],
+                 "lines": self.aoi[2],
+                 "samples": self.max_frames,
+                 "data type": 12,
+                 "interleave": 'bip',
+                 "byte order": 0,
+                 "header offset": 0
+             }
+        with open(self.folder + self.base_name + str(int(np.floor(time.time()*1000))) + ".hdr", "w") as file:
+            file.write("ENVI \n")
+            for k, v in md.items():
+                dictionary_content = k + " = " + str(v) + "\n"
+                file.write(dictionary_content)
 
     def prep_envi_capture(self):
         # define the metadata
