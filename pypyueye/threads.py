@@ -62,7 +62,7 @@ class GatherThread(Thread):
                                            img_buffer.mem_ptr,
                                            img_buffer.mem_id)
             if ret == ueye.IS_SUCCESS:
-                self.capt_time = np.floor(time.time())*1000 + datetime.now().microsecond
+                self.capt_time = np.floor(time.time()*1000)
                 imdata = ImageData(self.cam.handle(), img_buffer)
                 self._process(imdata)
             else:
