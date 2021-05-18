@@ -208,6 +208,10 @@ class MultiFrameThread(GatherThread):
                 #end if max frames
                 if self.stop_check():
                     self.map.flush()
+        elif self.file_type=='.bip':
+            def process(self, image_data):
+                image_data.as_1d_image().astype(np.int16).tofile(self.path())
+                self.stop_check()
         else:
             def process(self, image_data):
                 iio.imwrite(self.path(), image_data.as_1d_image())
