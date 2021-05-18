@@ -33,6 +33,7 @@ from .utils import ImageData, ImageBuffer, do_bin
 import imageio as iio
 import time
 import spectral.io.envi as envi
+from datetime import datetime
 
 #Globals
 #how often to flush the data stored in the envi file format to disk
@@ -61,7 +62,7 @@ class GatherThread(Thread):
                                            img_buffer.mem_ptr,
                                            img_buffer.mem_id)
             if ret == ueye.IS_SUCCESS:
-                self.capt_time = time.time()
+                self.capt_time = np.floor(time.time())*1000 + datetime.now().microsecond
                 imdata = ImageData(self.cam.handle(), img_buffer)
                 self._process(imdata)
             else:
@@ -125,7 +126,7 @@ class SaveThread(GatherThread):
 
 class MultiFrameThread(GatherThread):
     def __init__(self, cam, folder, base_name, max_frames=-1, file_type='.png', copy=True,
-                 aoi=(), binning=()):
+                 aoi=(), binning=(), do_print=False):
         """
         Thread used for saving multiple images.
 
@@ -147,6 +148,8 @@ class MultiFrameThread(GatherThread):
             self.binning = binning
 
         self.set_process()
+        if do_print:
+            self.print_2_process()
         print("process set")
 
 
@@ -155,7 +158,7 @@ class MultiFrameThread(GatherThread):
 
 
     def time_str(self):
-        return '{:.0f}'.format(self.capt_time*1000) # in ms
+        return '{:.0f}'.format(self.capt_time) # in ms
 
 
     def set_path(self):
@@ -211,6 +214,7 @@ class MultiFrameThread(GatherThread):
         elif self.file_type=='.bip':
             def process(self, image_data):
                 image_data.as_1d_image().astype(np.int16).tofile(self.path())
+                print(self.path())
                 self.stop_check()
         else:
             def process(self, image_data):
@@ -218,6 +222,14 @@ class MultiFrameThread(GatherThread):
                 self.stop_check()
 
         self.process = lambda image_data: process(self, image_data)
+
+    def print_2_process(self):
+        def _process(self, image_data):
+            self.process(image_data)
+            self.d += 1
+            print(self.d)
+            image_data.unlock()
+        self._process = lambda image_data: _process(self, image_data)
 
 
     def prep_envi_capture(self):
