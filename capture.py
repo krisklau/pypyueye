@@ -12,14 +12,18 @@ parser.add_argument('captured_images_path', metavar='path',
                     default='~/tmp')
 parser.add_argument('base_name', metavar='base', default='TEST', type=str,
                     help='base name for the saved files')
-parser.add_argument('-f', '--fps',
+parser.add_argument('-f', '--fps', type=int,
                     default=20, help='frames per second to be captured' )
-parser.add_argument('-n', '--number_of_frames',
+parser.add_argument('-n', '--number_of_frames', type=int,
                     default=100, help='total number of frames to capture' )
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
 parser.add_argument('-b', '--binning', default=[1,1], nargs=2,
                     help='number of raw pixels per saved pixel')
+parser.add_argument('-p', '--do_print', action="store_true",
+                    help='print info about captured frames')
+parser.add_argument('-g', '--gain', type=int, default=1,
+                    help='set the (master) gain')
 
 args = parser.parse_args()
 
@@ -30,6 +34,8 @@ BASE_NAME = args.base_name
 MAX_FRAMES = args.number_of_frames
 FILE_TYPE = args.file_type
 BINNING = tuple(args.binning)
+DO_PRINT = args.do_print
+MASTER_GAIN = args.gain
 #should add binning support with "numpy.add.reduceat"
 
 print("saving as {}".format(FILE_TYPE))
@@ -47,6 +53,7 @@ with Cam() as c:
     actual_fps = c.get_fps()
     c.set_exposure(1/actual_fps*1000)
     c.set_aoi(*AOI)
+    c.set_gain(MASTER_GAIN, 0, 0, 0)
     aoi = c.get_aoi()
 
     print(f"MODIFIED VALUES")
@@ -61,6 +68,6 @@ with Cam() as c:
 
     thread = MultiFrameThread(c, folder=FOLDER, base_name=BASE_NAME,
                               max_frames=MAX_FRAMES, file_type=FILE_TYPE,
-                              aoi=AOI, binning=BINNING)
+                              aoi=AOI, binning=BINNING, do_print=DO_PRINT)
     thread.start()
     thread.join()
