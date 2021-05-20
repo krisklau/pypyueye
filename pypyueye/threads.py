@@ -67,7 +67,9 @@ class GatherThread(Thread):
                 self._process(imdata)
             else:
                 print("Warning: Missed %dth frame !"% self.d)
-                self.d += 1
+                # Don't increment for envi-mode if missed, just go until we store what we need
+                if not self.file_type == 'envi':
+                    self.d += 1
 
     def process(self, image_data):
         pass
