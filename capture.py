@@ -18,13 +18,14 @@ parser.add_argument('-n', '--number_of_frames', type=int,
                     default=100, help='total number of frames to capture' )
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
-parser.add_argument('-b', '--binning', default=[1,1], nargs=2,
+parser.add_argument('-b', '--binning', default=[1,1], nargs=2, type=int,
                     help='number of raw pixels per saved pixel')
 parser.add_argument('-p', '--do_print', action="store_true",
                     help='print info about captured frames')
 parser.add_argument('-g', '--gain', type=int, default=1,
                     help='set the (master) gain')
-parser.add_argument('-a', '--aoi', default=[0, 0, 1088, 2048], nargs=2,
+parser.add_argument('-a', '--aoi', default=[0, 0, 1088, 2048],
+                    type=int, nargs=4,
                     help='area of interest ymin, xmin, ymax, xmax')
 
 args = parser.parse_args()
