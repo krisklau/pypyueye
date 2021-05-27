@@ -66,6 +66,7 @@ with Cam() as c:
     print(f'Available fps range: {c.get_fps_range()}')
     print(f'Pixelclock: {c.get_pixelclock()}')
     print(f'aoi: {aoi.height}, {aoi.width}')
+    print(f'binning: {BINNING}')
     pixel_clock = c.get_pixelclock()
     exposure = c.get_exposure()
 
