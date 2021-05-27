@@ -175,7 +175,7 @@ class MultiFrameThread(GatherThread):
                 return False
 
     def set_data(self):
-        if binning:
+        if self.binning:
             def data(self, image_data):
                 # bin along axis 0
                 a = do_bin(image_data.as_1d_image(),
