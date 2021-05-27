@@ -191,8 +191,9 @@ class MultiFrameThread(GatherThread):
                 return image_data.as_1d_image()
 
     def path(self):
-        time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
-        return self.folder + self.base_name + str(int(self.capt_time)) + self.file_type
+        #time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
+        return self.folder + self.base_name + '_' + self.time_str() + '.' + self.file_type
+        #return self.folder + self.base_name + str(int(self.capt_time)) + self.file_type
 
     def set_process(self):
         if self.file_type=='envi':
