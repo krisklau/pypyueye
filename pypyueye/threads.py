@@ -29,7 +29,7 @@ __status__ = "Development"
 import numpy as np
 from pyueye import ueye
 from threading import Thread
-from .utils import ImageData, ImageBuffer, do_bin
+from .utils import ImageData, ImageBuffer, do_bin, make_binner
 import imageio as iio
 import time
 import spectral.io.envi as envi
@@ -142,11 +142,28 @@ class MultiFrameThread(GatherThread):
 
         if aoi:
             self.aoi = aoi
+            self.frame_shape = (aoi[3], aoi[2])
+        else:
+            #There should be a way to just grab this from the camera
+            self.frame_shape = (1088, 2048)
+
+        if self.file_type=='.tiff':
+            self.dtype = np.uint16
+        else:
+            self.dtype = np.uint8
 
         self.max_frames = max_frames
+
         if binning:
             self.binning = binning
+            self.xbin = make_binner(self.frame_shape,
+                                    self.binning[0], axis=0, dtype=self.dtype)
+            self.lbin = make_binner(self.frame_shape,
+                                    self.binning[1], axis=1, dtype=self.dtype)
+        else:
+            self.binning = False
 
+        self.set_data()
         self.set_process()
         if do_print:
             self.print_2_process()
@@ -175,20 +192,18 @@ class MultiFrameThread(GatherThread):
                 return False
 
     def set_data(self):
-        if binning:
+        if self.binning:
             def data(self, image_data):
                 # bin along axis 0
-                a = do_bin(image_data.as_1d_image(),
-                           factor=self.binning[0],
-                           axis=0)
+                a = self.xbin(image_data.as_1d_image())
                 # bin along axis 1
-                b = do_bin(a,
-                           factor=self.binning[1],
-                           axis=1)
+                b = self.lbin(a)
                 return b
         else:
             def data(self, image_data):
-                return image_data.as_1d_image()
+                return image_data.as_1d_image().astype(self.dtype)
+
+        self.parse_data = lambda x: data(self, x)
 
     def path(self):
         time_str = '{:.0f}'.format(self.capt_time*1000) # in ms
@@ -201,7 +216,7 @@ class MultiFrameThread(GatherThread):
 
             def process(self, image_data):
                 #save data
-                self.map[:, self.d, :] = image_data.as_1d_image()[:, :]
+                self.map[:, self.d, :] = self.parse_data(image_data)[:, :]
                 if self.d % ENVI_FLUSHING_N == 0:
                     self.map.flush()
                 #save timing
@@ -214,12 +229,13 @@ class MultiFrameThread(GatherThread):
         elif self.file_type=='.bip':
             self.envi_metadata()
             def process(self, image_data):
-                image_data.as_1d_image().astype(np.int16).tofile(self.path())
+                self.parse_data(image_data).astype(np.uint16).tofile(self.path())
                 print(self.path())
                 self.stop_check()
         else:
             def process(self, image_data):
-                iio.imwrite(self.path(), image_data.as_1d_image())
+                print(self.parse_data(image_data).shape)
+                iio.imwrite(self.path(), self.parse_data(image_data))
                 self.stop_check()
 
         self.process = lambda image_data: process(self, image_data)

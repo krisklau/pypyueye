@@ -173,6 +173,18 @@ class Rect:
         self.width = width
         self.height = height
 
+def make_binner(frame_shape, factor, axis, dtype):
+    L = frame_shape[axis]
+    bins = int(np.ceil(L / factor))
+    slices = [factor*i for i in range(bins)]
+    slices.append(L)
+
+    def do_bin(arr):
+        binned = np.add.reduceat(arr, slices[:-1], axis=axis, dtype=dtype)
+        return binned
+
+    return do_bin
+
 def do_bin(arr, factor, axis):
     '''
     Bin by factor along a particular axis

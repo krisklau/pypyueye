@@ -19,14 +19,14 @@ parser.add_argument('-n', '--number_of_frames', type=int,
 parser.add_argument('-t', '--file_type', default="jpg",
                     help='frames or images will be stored as this filetype')
 parser.add_argument('-b', '--binning', default=[1,1], nargs=2, type=int,
-                    help='number of raw pixels per saved pixel')
+                    help='number of raw pixels per saved pixel: spatial, spectral')
 parser.add_argument('-p', '--do_print', action="store_true",
                     help='print info about captured frames')
 parser.add_argument('-g', '--gain', type=int, default=1,
                     help='set the (master) gain')
 parser.add_argument('-a', '--aoi', default=[0, 0, 1088, 2048],
                     type=int, nargs=4,
-                    help='area of interest ymin, xmin, ymax, xmax')
+                    help='area of interest xmin, lmin, xwidth, lwidth')
 
 args = parser.parse_args()
 
@@ -39,7 +39,8 @@ FILE_TYPE = args.file_type
 BINNING = tuple(args.binning)
 DO_PRINT = args.do_print
 MASTER_GAIN = args.gain
-AOI = tuple(args.aoi)
+#the set_aoi function takes them in an odd order
+AOI = tuple([args.aoi[1], args.aoi[0], args.aoi[3], args.aoi[2]])
 #should add binning support with "numpy.add.reduceat"
 
 print("saving as {}".format(FILE_TYPE))
