@@ -18,6 +18,9 @@ You still have to install the IDS driver for the camera you intend to use.
 
 ## Usage
 
+Note that all data formats are 8-bit except for .tiff and .bip
+which are 16-bit
+
 The following script allows to display the live video:
 ```Python
 from pypyueye import Camera, FrameThread, PyuEyeQtApp, PyuEyeQtView
